@@ -8,7 +8,7 @@ public interface UsuarioService {
     Usuario autenticar(String email, String senha);
 
     // Business rule 2 - Add new user
-    Usuario salvarUsuario(Usuario usuario);
+    Usuario salvarUsuario(Usuario AUsuario);
 
     // Business rule 3 - Validate e-mail
     void validarEmail(String email);

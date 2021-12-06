@@ -1,5 +1,6 @@
 package com.yuri.minhasfinancas.service.impl;
 
+import com.yuri.minhasfinancas.exception.AutenticacaoException;
 import com.yuri.minhasfinancas.exception.RegraNegocioException;
 import com.yuri.minhasfinancas.model.entity.Usuario;
 import com.yuri.minhasfinancas.repository.UsuarioRepository;
@@ -7,6 +8,9 @@ import com.yuri.minhasfinancas.service.UsuarioService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -17,12 +21,19 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario autenticar(String email, String senha) {
-        return null;
+        Optional<Usuario> usuario = repository.findByEmail(email);
+        if (!usuario.isPresent()) throw new AutenticacaoException("Usuário não encontrado");
+
+        if (!usuario.get().getSenha().equals(senha)) throw new AutenticacaoException("Senha invalida para o usuário " + email);
+
+        return usuario.get();
     }
 
     @Override
+    @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
-        return null;
+        validarEmail(usuario.getEmail());
+        return repository.save(usuario);
     }
 
     @Override

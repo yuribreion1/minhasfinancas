@@ -3,7 +3,6 @@ package com.yuri.minhasfinancas.service;
 import com.yuri.minhasfinancas.exception.RegraNegocioException;
 import com.yuri.minhasfinancas.model.entity.Usuario;
 import com.yuri.minhasfinancas.repository.UsuarioRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +37,9 @@ class UsuarioServiceTest {
         assertThrows(RegraNegocioException.class, () -> {
             //scenario
             Usuario usuario = Usuario.builder()
-                    .id(123L)
-                    .nome("usuario")
-                    .email("email@email.com")
-                    .build();
+                .email("email@email.com")
+                .nome("Usuario")
+                .build();
 
             repository.save(usuario);
 
