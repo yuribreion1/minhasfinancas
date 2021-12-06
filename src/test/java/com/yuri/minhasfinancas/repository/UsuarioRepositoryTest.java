@@ -51,24 +51,27 @@ class UsuarioRepositoryTest {
     }
 
     @Test
+    @DisplayName("Persistir usuário no banco de dados")
     void adicionarUsuario() {
         Usuario usuarioSalvo = repository.save(criarUsuario());
         assertThat(usuarioSalvo.getId()).isNotNull();
     }
 
     @Test
+    @DisplayName("Pesquisa positiva de usuário")
     void procurarUsuarioPorEmail() {
         Usuario usuario = criarUsuario();
         entityManager.persist(usuario);
 
         Optional<Usuario> resultado = repository.findByEmail("usuario@email.com");
-        assertThat(resultado.isPresent()).isTrue();
+        assertThat(resultado).isNotEmpty();
     }
 
     @Test
+    @DisplayName("Pesquisa negativa de usuário")
     void procurarUsuarioNaoExistente() {
 
         Optional<Usuario> resultado = repository.findByEmail("usuario@email.com");
-        assertThat(resultado.isPresent()).isFalse();
+        assertThat(resultado).isEmpty();
     }
 }
