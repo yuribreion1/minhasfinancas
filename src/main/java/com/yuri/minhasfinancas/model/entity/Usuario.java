@@ -7,14 +7,16 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@Entity
+@Getter
+@Setter
+@ToString
+@Entity(name = "usuario")
 @Table(name = "usuario", schema = "financas")
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "nome")
