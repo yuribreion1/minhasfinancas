@@ -15,7 +15,8 @@ import javax.persistence.*;
 public class Usuario {
 
     @Id
-    @GeneratedValue
+    // @GeneratedValue usar esta anotatio para o H2
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
