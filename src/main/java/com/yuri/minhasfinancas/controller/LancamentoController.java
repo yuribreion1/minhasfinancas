@@ -8,24 +8,23 @@ import com.yuri.minhasfinancas.model.enums.StatusLancamento;
 import com.yuri.minhasfinancas.model.enums.TipoLancamento;
 import com.yuri.minhasfinancas.service.LancamentoService;
 import com.yuri.minhasfinancas.service.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lancamentos")
+@RequiredArgsConstructor
 public class LancamentoController {
 
-    private LancamentoService service;
+    private final LancamentoService service;
 
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
-    public LancamentoController(LancamentoService service) {
-        this.service = service;
-    }
 
     @PostMapping
     public ResponseEntity salvar(@RequestBody LancamentoDTO lancamentoDTO) {
@@ -38,17 +37,64 @@ public class LancamentoController {
         }
     }
 
-    private Lancamento converterParaDTO(LancamentoDTO dto) {
-        Usuario usuario = usuarioService.pegarUsuarioPorId(dto.getUsuario()).orElseThrow(() -> new RegraNegocioException("Usuário não encontrado para o id informado"));
-        return Lancamento.builder()
-                .descricao(dto.getDescricao())
-                .id(dto.getId())
-                .ano(dto.getAno())
-                .mes(dto.getMes())
-                .status(StatusLancamento.valueOf(dto.getStatus()))
-                .tipo(TipoLancamento.valueOf(dto.getTipo()))
-                .usuario(usuario)
-                .valor(dto.getValor())
+    @PutMapping("{id}")
+    public ResponseEntity atualizar(@RequestBody LancamentoDTO lancamentoDTO, @PathVariable("id") Long id) {
+        return service.pegarLancamentoPorId(id).map(entity -> {
+            try {
+                Lancamento lancamento = converterParaDTO(lancamentoDTO);
+                lancamento.setId(entity.getId());
+                service.atualizar(lancamento);
+                return ResponseEntity.ok(lancamento);
+            } catch (RegraNegocioException e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+        }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity deletar(@PathVariable("id") Long id) {
+        return service.pegarLancamentoPorId(id).map( entidade -> {
+            service.deletar(entidade);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }).orElseGet(() -> new ResponseEntity("Lançamento não encontrado", HttpStatus.BAD_REQUEST));
+    }
+
+    @GetMapping
+    public ResponseEntity buscar(
+            @RequestParam(value = "descricao", required = false) String descricao,
+            @RequestParam(value = "mes", required = false) Integer mes,
+            @RequestParam(value = "ano", required = false) Integer ano,
+            @RequestParam("usuario") Long idUsuario) {
+
+        Optional<Usuario> usuario = usuarioService.pegarUsuarioPorId(idUsuario);
+
+        Lancamento lancamento = Lancamento.builder()
+                .descricao(descricao)
+                .mes(mes)
+                .ano(ano)
                 .build();
+
+        if (usuario.isPresent()) return ResponseEntity.badRequest().body("Usuário não encontrado para o ID informado");
+        else lancamento.setUsuario(usuario.get());
+
+        List<Lancamento> lancamentos = service.buscar(lancamento);
+        return ResponseEntity.ok(lancamentos);
+    }
+
+    private Lancamento converterParaDTO(LancamentoDTO lancamentoDTO) {
+        Usuario usuario = usuarioService.pegarUsuarioPorId(lancamentoDTO.getUsuario()).orElseThrow(() -> new RegraNegocioException("Usuário não encontrado para o id informado"));
+        Lancamento lancamento = new Lancamento();
+
+        if (lancamentoDTO.getTipo() != null) lancamento.setTipo(TipoLancamento.valueOf(lancamentoDTO.getTipo()));
+        if (lancamentoDTO.getStatus() != null) lancamento.setStatus(StatusLancamento.valueOf(lancamentoDTO.getStatus()));
+
+        lancamento.setId(lancamentoDTO.getId());
+        lancamento.setDescricao(lancamentoDTO.getDescricao());
+        lancamento.setMes(lancamentoDTO.getMes());
+        lancamento.setAno(lancamentoDTO.getAno());
+        lancamento.setUsuario(usuario);
+        lancamento.setValor(lancamentoDTO.getValor());
+
+        return lancamento;
     }
 }
