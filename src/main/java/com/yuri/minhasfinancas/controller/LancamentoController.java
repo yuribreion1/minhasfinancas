@@ -1,5 +1,6 @@
 package com.yuri.minhasfinancas.controller;
 
+import com.yuri.minhasfinancas.dto.AtualizarStatusDTO;
 import com.yuri.minhasfinancas.dto.LancamentoDTO;
 import com.yuri.minhasfinancas.exception.RegraNegocioException;
 import com.yuri.minhasfinancas.model.entity.Lancamento;
@@ -51,6 +52,21 @@ public class LancamentoController {
         }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
     }
 
+    @PutMapping("{id}/atualiza-status")
+    public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO atualizarStatusDTO) {
+        return service.pegarLancamentoPorId(id).map(entity -> {
+          StatusLancamento statusEscolhido = StatusLancamento.valueOf(atualizarStatusDTO.getStatus());
+          if (statusEscolhido == null) return ResponseEntity.badRequest().body("Informe um status valido");
+          try {
+              entity.setStatus(statusEscolhido);
+              service.atualizar(entity);
+              return ResponseEntity.ok(entity);
+          } catch (RegraNegocioException e) {
+              return ResponseEntity.badRequest().body(e.getMessage());
+          }
+        }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity deletar(@PathVariable("id") Long id) {
         return service.pegarLancamentoPorId(id).map( entidade -> {
@@ -74,7 +90,7 @@ public class LancamentoController {
                 .ano(ano)
                 .build();
 
-        if (usuario.isPresent()) return ResponseEntity.badRequest().body("Usuário não encontrado para o ID informado");
+        if (!usuario.isPresent()) return ResponseEntity.badRequest().body("Usuário não encontrado para o ID informado");
         else lancamento.setUsuario(usuario.get());
 
         List<Lancamento> lancamentos = service.buscar(lancamento);
