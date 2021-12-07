@@ -5,6 +5,7 @@ import com.yuri.minhasfinancas.exception.AutenticacaoException;
 import com.yuri.minhasfinancas.exception.RegraNegocioException;
 import com.yuri.minhasfinancas.model.entity.Usuario;
 import com.yuri.minhasfinancas.service.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/usuarios")
 @Slf4j
+@RequiredArgsConstructor
 public class UsuarioController {
 
-    private UsuarioService service;
-
-    public UsuarioController(UsuarioService service) {
-        this.service = service;
-    }
+    private final UsuarioService service;
 
     @PostMapping("/autenticar")
     public ResponseEntity autenticar(@RequestBody UsuarioDTO dto) {
