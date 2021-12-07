@@ -2,6 +2,8 @@ package com.yuri.minhasfinancas.service;
 
 import com.yuri.minhasfinancas.model.entity.Usuario;
 
+import java.util.Optional;
+
 public interface UsuarioService {
 
     // Business rule 1 - Authenticate user
@@ -12,4 +14,6 @@ public interface UsuarioService {
 
     // Business rule 3 - Validate e-mail
     void validarEmail(String email);
+
+    Optional<Usuario> pegarUsuarioPorId(Long id);
 }
