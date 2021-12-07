@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
@@ -67,8 +68,13 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getDescricao().isEmpty() || lancamento.getDescricao() == null) throw new RegraNegocioException("Informe uma regra valida");
         if (lancamento.getMes() < 1 || lancamento.getMes() > 12 || lancamento.getMes() == null) throw new RegraNegocioException("Informe um mês válido");
         if (lancamento.getAno() == null || lancamento.getAno().toString().length() > 4) throw new RegraNegocioException("Informe um ano válido");
-        if (lancamento.getUsuario() == null || lancamento.getId() == null) throw new RegraNegocioException("Um usuário é necessário");
+        if (lancamento.getUsuario() == null) throw new RegraNegocioException("Um usuário é necessário");
         if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) throw new RegraNegocioException("Um valor válido precisa ser especificado");
         if (lancamento.getTipo() == null) throw new RegraNegocioException("Informe um tipo válido para lancamento");
+    }
+
+    @Override
+    public Optional<Lancamento> pegarLancamentoPorId(Long id) {
+        return repository.findById(id);
     }
 }
