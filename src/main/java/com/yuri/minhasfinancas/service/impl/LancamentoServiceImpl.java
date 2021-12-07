@@ -3,6 +3,7 @@ package com.yuri.minhasfinancas.service.impl;
 import com.yuri.minhasfinancas.exception.RegraNegocioException;
 import com.yuri.minhasfinancas.model.entity.Lancamento;
 import com.yuri.minhasfinancas.model.enums.StatusLancamento;
+import com.yuri.minhasfinancas.model.enums.TipoLancamento;
 import com.yuri.minhasfinancas.repository.LancamentoRepository;
 import com.yuri.minhasfinancas.service.LancamentoService;
 import org.springframework.data.domain.Example;
@@ -76,5 +77,16 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Override
     public Optional<Lancamento> pegarLancamentoPorId(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    public BigDecimal obterSaldoPorUsuario(Long id) {
+        BigDecimal receita = repository.obterSaldoPorTipoLancamentoEUsuario(id, TipoLancamento.RECEITA);
+        BigDecimal despesa = repository.obterSaldoPorTipoLancamentoEUsuario(id, TipoLancamento.DESPESA);
+
+        if (receita == null) receita = BigDecimal.ZERO;
+        if (despesa == null) despesa = BigDecimal.ZERO;
+
+        return receita.subtract(despesa);
     }
 }
